@@ -15,6 +15,6 @@ class Task extends Model
         'is_completed',
         'link',
         'user_id',
-        'due_date'
+        'due_date',
     ];
 }

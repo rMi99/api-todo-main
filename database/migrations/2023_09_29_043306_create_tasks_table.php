@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('task');
             $table->text('description')->nullable();
             $table->text('link')->nullable()->default('google.lk');
-            $table->dateTime('due_date');
+            $table->date('due_date');
             $table->boolean('is_completed')->default(0);
             $table->timestamps();
         });
