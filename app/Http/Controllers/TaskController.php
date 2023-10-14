@@ -22,7 +22,8 @@ class TaskController extends Controller
                 'description' => $task->description,
                 'link' => $task->link,
                 'is_completed' => $task->is_completed,
-                'due_date' => $task->due_date,
+                'due_date' => Carbon::parse($task->due_date)->format('M d, Y'),
+
             ];
         });
 
