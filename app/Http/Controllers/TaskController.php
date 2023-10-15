@@ -25,6 +25,7 @@ class TaskController extends Controller
                 'due_date' => $task->due_date,
             ];
         });
+        $formattedTasks = $formattedTasks->sortBy('updated_at');
 
         return response()->json($formattedTasks);
     }
