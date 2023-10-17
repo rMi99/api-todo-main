@@ -32,8 +32,8 @@ return [
     ],
 
     'google' => [
-        'client_id' => '225025296524-nuqrlqc1akpbndt36vmn1g9ph1hmfsck.apps.googleusercontent.com',
-        'client_secret' => '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',
+        'client_id' => '326007732083-ochcouqhgmsvugsgul61cs9407ajkaut.apps.googleusercontent.com',
+        'client_secret' => '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',
         'redirect' => 'http://127.0.0.1:8000/auth/google/callback',
     ],
 
