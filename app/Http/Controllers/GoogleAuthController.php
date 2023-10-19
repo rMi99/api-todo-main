@@ -1,114 +1,86 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\no;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
-
-
-use function Laravel\Prompts\error;
 
 class GoogleAuthController extends Controller
 {
-   
-
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
-    
+
     public function handleGoogleCallback()
     {
-        try {
-           $google_user = Socialite::driver('google')->user();
-           $user = User::where('google_id',$google_user->getId())->first();
-            if($user){
+        $user = Socialite::driver('google')->stateless()->user();
+        $existingUser = User::where('google_id', $user->getId())->first();
 
-                $new_user =User::create([
-                    'name' => $google_user->getName(),
-                    'email'=> $google_user->getEmail(),
-                    'google_id'=> $google_user->getId(),
+        if ($existingUser) {
+            auth()->login($existingUser);
 
-                ]);
+            // Generate a token for the authenticated user
+            $token = $existingUser->createToken('API Access')->accessToken;
 
-                Auth::login(($new_user));
-                return redirect()->intended('home');
+            // return response()->json([
+            //     'user_id' => $existingUser->id,
+            //     'username' => $existingUser->name,
+            //     'email' => $existingUser->email,
+            //     'access_token' => $token,
+            // ]);
+            
+            return redirect('http://localhost:3000/login?token='.base64_encode($existingUser->google_id));
+        
+        } else {
+            $newUser = new User();
+            $newUser->name = $user->getName();
+            $newUser->email = $user->getEmail();
+            $newUser->google_id = $user->getId();
+            $newUser->password = Hash::make('your_default_password');
+            $newUser->save();
 
-            }else{
+            auth()->login($newUser);
 
-                Auth::login(($user));
-                return redirect()->intended('home');
+            // Generate a token for the new user
+            $token = $newUser->createToken('API Access')->accessToken;
 
-                
-            }
-
-
-        } catch (\Throwable $th) {
-            dd( $th);
+            return response()->json([
+                'user_id' => $newUser->id,
+                'username' => $newUser->name,
+                'email' => $newUser->email,
+                'access_token' => $token,
+            ]);
         }
-
     }
 
-    
+    public function confirmGoogleCallback(Request $request){
+        $validator = Validator::make($request->all(), [
+            'token' => 'required'
+       ]);
+
+       if ($validator->fails()) {
+           return response()->json([
+               'status' => 401,
+               'message' => "Token Required"
+           ],400);
+       }
+
+       $user = User::where ("google_id",base64_decode($request->token))->select('id','name','email')->first();
+
+       if(!$user){
+           return response()->json([
+               'status' => 401,
+               'message' => "Unauthorized"
+           ],401);
+        }
+
+        $token= $user->createToken("API TOKEN")->plainTextToken;
+
+        Arr::add($user,'token',$token);
+           return response()->json($user);
+    }
 }
-
-
-// <?php
-
-// namespace App\Http\Controllers;
-
-// use App\Models\User;
-// use GuzzleHttp\Exception\ClientException;
-// use Illuminate\Http\JsonResponse;
-// use Laravel\Socialite\Contracts\User as SocialiteUser;
-// use Laravel\Socialite\Facades\Socialite;
-
-
-
-// class GoogleAuthController extends Controller
-// {
-   
-//     public function redirectToAuth(): JsonResponse
-//     {
-//         return response()->json([
-//             // 'url' => Socialite::driver('google')->redirect()->getTargetUrl(),
-//             'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
-
-//         ]);
-//     }
-
-//     public function handleAuthCallback(): JsonResponse
-//     {
-//         try {
-//             /** @var SocialiteUser $socialiteUser */
-//             $socialiteUser = Socialite::driver('google')->user();
-//         } catch (ClientException $e) {
-//             return response()->json(['error' => 'Invalid credentials provided.'], 422);
-//         }
-
-//         /** @var User $user */
-//         $user = User::query()
-//             ->firstOrCreate(
-//                 [
-//                     'email' => $socialiteUser->getEmail(),
-//                 ],
-//                 [
-//                     'email_verified_at' => now(),
-//                     'name' => $socialiteUser->getName(),
-//                     'google_id' => $socialiteUser->getId(),
-//                     'avatar' => $socialiteUser->getAvatar(),
-//                 ]
-//             );
-
-//         return response()->json([
-//             'user' => $user,
-//             'access_token' => $user->createToken('google-token')->plainTextToken,
-//             'token_type' => 'Bearer',
-//         ]);
-//     }
-// }
-
-    

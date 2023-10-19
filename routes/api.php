@@ -25,8 +25,9 @@ Route::post('/logout',[AuthController::class, 'logout']);
 // Route::get('auth/google', [ GoogleAuthController::class,'redirectToGoogle'])->name('auth-google');
 // Route::get('auth/google/callback', [ GoogleAuthController::class,'handleGoogleCallback']);
 
-Route::get('auth', [GoogleAuthController::class, 'redirectToAuth']);
-Route::get('auth/google/callback', [GoogleAuthController::class, 'handleAuthCallback']);
+Route::get('auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+Route::post('auth/google/callback/confirm', [GoogleAuthController::class, 'confirmGoogleCallback']);
 
 Route::get('/user/{id}', [UserController::class,'user']);
 Route::put('/user/change/{id}', [UserController::class,'userChange']);
