@@ -45,15 +45,9 @@ class GoogleAuthController extends Controller
 
             auth()->login($newUser);
 
-            // Generate a token for the new user
+            
             $token = $newUser->createToken('API Access')->accessToken;
 
-            // return response()->json([
-            //     'user_id' => $newUser->id,
-            //     'username' => $newUser->name,
-            //     'email' => $newUser->email,
-            //     'access_token' => $token,
-            // ]);
             return redirect('http://localhost:3000/login?token='.base64_encode($newUser->google_id));
 
         }

@@ -22,12 +22,14 @@ class TaskController extends Controller
                 'description' => $task->description,
                 'link' => $task->link,
                 'is_completed' => $task->is_completed,
+                
                 'due_date' => $task->due_date,
             ];
         });
         $formattedTasks = $formattedTasks->sortBy('updated_at');
 
         return response()->json($formattedTasks);
+        
     }
 
     public function store(Request $request)
@@ -49,7 +51,7 @@ class TaskController extends Controller
                 'description' => $request->description,
                 'user_id' => $request->user_id,
                 'link' => $request->link,
-                'is_completed' => 0,
+                'is_completed' => false,
                 'due_date' => $request->due_date,
             ]);
             return response()->json(['status', 'Task created successfully'], 200);

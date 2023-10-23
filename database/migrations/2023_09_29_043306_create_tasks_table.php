@@ -21,7 +21,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->text('link')->nullable()->default('google.lk');
             $table->date('due_date');
-            $table->boolean('is_completed')->default(0);
+            // $table->boolean('is_completed')->default(false);
+            $table->boolean('is_completed')->default(false);
             $table->timestamps();
         });
     }
